@@ -1,0 +1,1 @@
+<ball_run.Obstacle instance at 0x11503d3b0>0.119117647059

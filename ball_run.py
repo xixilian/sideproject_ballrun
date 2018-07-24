@@ -55,7 +55,7 @@ class Ball_run(object):
 
 
 
-	# just reset positions and angles
+	# reset positions and angles
 	def reset(self):
 
 		state = []
@@ -102,7 +102,7 @@ class Ball_run(object):
             for line in f :
                 o = Obstacle()
                 contents = line.split(' ')
-                    #print contents
+                
                 if len(contents) == 7:
                     o.dimensions.append(contents[0])
                     o.dimensions.append(contents[1])
@@ -144,10 +144,15 @@ class Ball_run(object):
             ball_z = self.state[-1]
 
             if self.success :
+                # we don't want overlapping
+                # the reward will be 1 if the overlap_count is 0
                 rw = 1 - overlap_count
-                #elif self.counter < 50 :
-                # optimize the obstacles position w.r.t. ball pos
-                # need to push the ball as right as possible
+            
+            # optimize the obstacles position w.r.t. ball pos
+            # need to push the ball to the goal position
+            # which usually locates at the right end of the grid
+            
+            # the ball is on the ground
             elif ball_x < 0:
                 penalty =  (ball_x - self.goal_pos_x + 1)*(ball_x - self.goal_pos_x + 1) + overlap_count
                 rw = -(penalty *PENALTY_FACTOR)
@@ -158,16 +163,6 @@ class Ball_run(object):
                 rw  = -(penalty *PENALTY_FACTOR)
 
             return rw
-
-        '''
-		else :
-            		ball_x = self.state[-2]
-        		ball_z = self.state[-1]
-
-        		# is smaller than 1
-        		penalty = (ball_x - self.goal_pos_x)*(ball_x - self.goal_pos_x) + (ball_z - self.goal_pos_z) * (ball_z - self.goal_pos_z) + overlap_count
-        	return -(penalty*PENALTY_FACTOR)
-        '''
 
 	def _update_state(self, action):
             """
@@ -181,25 +176,25 @@ class Ball_run(object):
             if action == 0:
                 # no greater than 0.5
                 self.obstacles[0].pos[0] = min(self.obstacles[0].pos[0] + 0.05 , 0.5)
-                #print self.obstacles[0].pos[0]
+    
             elif action == 1 :
                 # no smaller than 0
                 self.obstacles[0].pos[0] = max(0, self.obstacles[0].pos[0] - 0.05)
-                #print self.obstacles[0].pos[0]
+               
             elif action == 2 :
                 self.obstacles[0].pos[2] = min(self.obstacles[0].pos[2] + 0.05 , 0.5)
-                #print self.obstacles[0].pos[2]
+
             elif action == 3 :
                 self.obstacles[0].pos[2] = max(0, self.obstacles[0].pos[2] - 0.05)
-                #print self.obstacles[0].pos[2]
+
             elif action == 4 :
                 # no greater than 1
                 self.obstacles[0].angle = min(self.obstacles[0].angle + 0.2 , 1)
-                #print self.obstacles[0].angle
+
             elif action == 5 :
                 # no smaller than -1
                 self.obstacles[0].angle = max(self.obstacles[0].angle - 0.2, -1)
-                #print self.obstacles[0].angle
+                
             elif action == 6 :
                 self.obstacles[1].pos[0] = min(self.obstacles[1].pos[0] + 0.05 , 0.5)
             elif action == 7 :
@@ -235,18 +230,15 @@ class Ball_run(object):
             self._write_setup()
 
             # call the dynamic
-            subprocess.call("./dynamics", shell= False)
+            subprocess.call("./dynamics", shell= True)
 
             for o in self.obstacles:
                 out.append(round(float( o.pos[0]),2))
                 out.append(round(float( o.pos[2]),2))
                 out.append(round(float( o.angle),2))
 
-            #print ("goal grid")
-            
             out.append(self.goal_x_grid)
             out.append(self.goal_z_grid)
-            #print self.goal_x_grid, self.goal_z_grid
 
             f = open('./results/result.txt', 'r')
             l = f.readlines()
@@ -256,9 +248,6 @@ class Ball_run(object):
             x = int(float(result[0])/0.05) * 0.05
             z = int(float(result[1])/0.05) * 0.05
             
-            #print ("ball pos")
-            #print x,z
-
             out.append(x)
             out.append(z)
             print out
@@ -272,13 +261,12 @@ class Ball_run(object):
             f1 = open("./params/dyn_setup.txt", 'w')
 
             for o in self.obstacles:
-                #f1.write("o ")
+                
                 f1.write(str(DIMENSION_X) + ' ' + str(DIMENSION_Y) + ' ' + str(DIMENSION_Z) + ' ')
-                #print o.pos[0][0]
                 f1.write(str(float(o.pos[0])) + ' 0.0 ' + str(float(o.pos[2])) + ' ' + str(float(o.angle))+'\n' )
 
             for o in self.goal:
-                #f1.write("o ")
+                
                 f1.write(str(o.dimensions[0]) + ' ' + str(o.dimensions[1]) + ' ' + str(o.dimensions[2]) + ' ' )
                 f1.write(str(o.pos[0]) + ' ' + str(o.pos[1]) + ' ' + str(o.pos[2]) + ' ')
                 f1.write(str(o.angle))
@@ -289,57 +277,37 @@ class Ball_run(object):
 	def _draw_state(self):
 
 		self.printcounter +=1
+        # 110 : the range of the "wall" in simulation is 0 - 0.55
 		L=110; W=110
 		image = Image.new("1", (L, W))
 		draw = ImageDraw.Draw(image)
 
 		state = self.state
-		#print state
+		
 		for i in range(0, self.n_obstacles):
 		    vertices = d.makeRectangle(56, 8.5, float(state[i*3+2]), offset=(int(state[i*3]*200) , 110 - int(state[i*3+1]*200)))
-		    
-		    #print state[i*3], state[i*3+1], state[i*3+2]
 		    draw.polygon(vertices, fill=1)
 		
 		# draw goal
 		goal_l = int(self.goal_len*200)
 		goal_w = int(self.goal_height * 200)
 
-		#print("ori goal len")
-		#print self.goal_len
-		
-		#print ("goal len")
-		#print (goal_l)
-
 		ver = d.makeRectangle(goal_l, goal_w, 0, offset=(int(self.goal_x_grid*200) ,110 - int(self.goal_z_grid * 200)))
 		draw.polygon(ver, fill=1)
 
-		#print ("goal in pix")
-		#print ver
 		# draw the ball
 		ball_x = int(state[-2]*200)
 		ball_z = 110 - int(state[-1]*200)
 
-		#print ("ball x")
-		#print ball_x		
-
 		v = d.makeRectangle(5,5,0,offset=(ball_x, ball_z))
 		draw.polygon(v, fill =1)
 
-		#print ("ball")
-		#print v
 		if (self.counter >= 49):
 			image.save("./frames/%5d.png"%self.printcounter)
 		image.save("./test.png")
 		
         	arr = np.fromiter(iter(image.getdata()), np.uint8)
         	arr.resize(110, 110)
-
-        	#arr ^= 0xFF  # invert
-        	#inverted_im = Image.fromarray(arr, mode='L')
-        	#inverted_im.show()
-
-        	#print arr
 
 		return arr
         	'''

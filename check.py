@@ -11,11 +11,11 @@ import glob
 import numpy as np
 import scipy
 from scipy.optimize import differential_evolution, basinhopping
-#import cma
+
 import math
 
 from PIL import Image, ImageDraw
-#from optimize import Obstacle
+
 
 
 
@@ -74,7 +74,6 @@ def get_valid_output(obst):
     for o in obst:
 		f1.write("o ")
 		f1.write(str(o.dimensions[0]) + ' ' + str(DIMENSION_Y) + ' ' + str(o.dimensions[2]) + ' ')
-		        	#print o.pos[0][0]
 		f1.write(str(float(o.pos[0])) + ' 0.0 ' + str(float(o.pos[2])) + ' ' + str(float(o.angle))+'\n' )
 
     f1.close()
@@ -138,14 +137,11 @@ def get_valid_output(obst):
                     top = v[1]
 
                 if(pos_x >= (left- BALL_DIAMETER)  and pos_x <= (right + BALL_DIAMETER) and pos_z >= (under - BALL_DIAMETER) and pos_z <= (top+ BALL_DIAMETER)):
-                    #print "colliding with movable %1d"%movable.index(o)
                     f2.write("colliding with movable %1d"%movable.index(o) + '\n')
                     f2.write(str(ver) + '\n')
 
-                #ds = [d0,d1,d2,d3]
                 ds = []
                 p = (pos_x, pos_z)
-                #ver.sort(key = lambda x: x[0])
 
                 for i in range(0,len(ver)):
 
@@ -182,7 +178,7 @@ def get_valid_output(obst):
 	for o in movable:
 		if not o in collide:
 			idle.append(o)
-			#idle_index.append(movable)
+
 	coll = []
 
 	for i, o in enumerate( collide):
@@ -226,11 +222,9 @@ def get_valid_output(obst):
 
 						idle[0].pos[0] = 0.5
 						idle[0].pos[2] = 0.5	
-						#idle[0].angle = idle[0].angle/2.0
-						#idle[0] = move_idle_right(idle[0], right)
+				
 					if(overlap(ver_1, ver_f)):
-						#idle[1].angle = idle[1].angle/2.0
-						#idle[1] = move_idle_left(idle[1], left)
+					
 						idle[1].pos[0] = 0.5
 						idle[1].pos[2] = 0.5 
 		
@@ -238,7 +232,6 @@ def get_valid_output(obst):
 			
 			i = idle[0]
 			
-			#print ver_right
 			i = move_idle_right(i, right)
 			
 
@@ -256,12 +249,9 @@ def get_valid_output(obst):
 			
 		elif(len(idle) == 2):
 
-			#i = idle[0]
-			#i2 = idle[1]
-
 			i = move_idle_right(idle[0], right)
 			j = move_idle_left(idle[1], left) 
-			#if(idle[0].angle > 0 ):
+			
 			if len(fixed) > 3:
 				ver_0 = makeRectangle(i.dimensions[0], i.dimensions[2], i.angle, (i.pos[0], i.pos[2]))
 				ver_1 = makeRectangle(j.dimensions[0], j.dimensions[2], j.angle, (j.pos[0], j.pos[2]))
@@ -305,7 +295,7 @@ def get_valid_output(obst):
 
 			if(overlap(o1_ver, o2_ver)):
 				
-				print "fixing %1d"%ind_1
+                print "fixing %1d"%ind_1
 				print "and %1d"%ind_2
 				# decide which direction should move, and we move 
 				#new1, new2 = fix_movables(o1, o2, o1_ver, o2_ver, fixed)
@@ -333,28 +323,12 @@ def get_valid_output(obst):
 					p1 = (o.pos[0], o.pos[2])
 					p2 = (fix.pos[0], fix.pos[2])
 										
-					#TODO
-					#d = get_point_line_dist(p1, p2, fixed.angle)
-					#d_1 = o.dimensions[0]/2.0 - (d/math.sin(o.angle))
-					#shift_d  = d_1 + (fixed.dimensions[2]/2.0)*((1/math.sin(o.angle)) + (1/math.tanh(o.angle)))
-					#shift_d = get_shift_point_dist(ver, f_ver)
+					
 					shift, up = get_shift_dist(o, fix, fixed)
-					#print ("shift_d" , shift_d)					
-					#shift = shift_d * math.cos(o.angle)
-					print ("shift" , shift)
-					#up = shift_d * math.sin(o.angle)
-					print ( "up" , up)
-					#shift = (o.dimensions[0] - d ) * math.sin(o.angle)
-					#if shift_d > 0.15 :
-					#	shift = 0
-					#	up = 0
-					#if  fix.pos[0] < 0.25:
-					#	print "move down"
-					#	o.pos[0] -= abs(shift)
-					#else : o.pos[0] += abs(shift)
 					
+                    # print ("shift" , shift)
+                    #print ( "up" , up)
 					
-					#up = (o.dimensions[0] - d  )  * math.cos(o.angle)
 					if o.pos[0] < 0.25:
 						o.pos[0] -= abs(shift)
 					else:
@@ -368,18 +342,19 @@ def get_valid_output(obst):
 					ver_i =  makeRectangle(i.dimensions[0], i.dimensions[2], i.angle, (i.pos[0], i.pos[2]))
 
 					if (overlap(ver, ver_i)):
-						print "hit idle"
+                        # print "hit idle"
 						ind = idle.index(i)
 						shift_d = get_shift_point_dist(ver, ver_i)					
 						shift = shift_d * math.cos(o.angle)
-						up = shift_d * math.sin(o.angle)	
+						up = shift_d * math.sin(o.angle)
+                        
 						#left side
 						if(i.angle > 0):
-							#i.angle = i.angle/2.0 
-							#i = move_idle_left(i, left)
+							
 							# put it somewhere else
 							i.pos[0] = 0.6
 							i.pos[2] = 0.5
+                        
 						# right side
 						elif(i.angle < 0):
 							i.pos[0] += shift
@@ -389,7 +364,6 @@ def get_valid_output(obst):
 
 
 	return coll+idle+fixed
-
 
 
 # distance from point p0 to line formed by p1, p2
@@ -449,8 +423,7 @@ def move_idle_left(i, left):
 
 	return  i
 			 			
-# FIXME sth wrong here
-#def fix_movables(o1, o2, o1_ver, o2_ver, fixed):
+
 def fix_movables(o_list, fixed):
 	
 	o1 = o_list[0]
@@ -475,17 +448,8 @@ def fix_movables(o_list, fixed):
 	ver_left = makeRectangle(left.dimensions[0], left.dimensions[2], left.angle, (left.pos[0], left.pos[2]))
 	ver_left.sort(key = lambda x: x[0])
 	left_bound = ver_left[0][0]
-	
-	# move it to the left
-	#if (x_1 < dim_x_1 ):
-		#print "case 1 : x_1 < dim_x_1"
-		#if(left_x_2 > 0):
-		# otherwise the ball may have not enough energy to roll
-		#print o2.angle
-		#if (o2.angle < 0):
-			#o2.angle = abs(o2.angle)
+
 	p1 = (o1.pos[0], o1.pos[2])
-		#angle1 = o1.angle
 	p2 = (o2.pos[0], o2.pos[2])
 	d = get_point_line_dist(p1, p2, o2.angle)
 
@@ -494,57 +458,31 @@ def fix_movables(o_list, fixed):
 	o2_2_ver.sort(key = lambda x: x[0])
 	left_x_2 = o2_2_ver[0][0]
 		
-	# FIXME wrong
+
 	if(x_1 > -(dim_x_1)/4.0) and (x_2 < dim_x_2):
-		print "shift the left one"
-		#print d
-
-		#d_1 = o1.dimensions[0]/2.0 - (d/math.sin(o1.angle))
-		#d_1 = o1.dimensions[0]/2.0
-		#shift_d  = d_1 + (o2.dimensions[2]/2.0)*((1/math.sin(o1.angle)) + (1/math.tanh(o1.angle)))
-		#shift_d = d_1 + (o2.dimensions[2]/2.0)*((1/math.sin(o1.angle)) + math.tanh(o1.angle)) 
+ 
 		shift_d = get_shift_point_dist(o1_ver, o2_2_ver)
-
 		shift = shift_d * math.cos(o1.angle)
-		#shift = (o1.dimensions[0] - d * math.cos(o1.angle) + (o2.dimensions[2]/2.0)*math.sin(o1.angle) ) * math.cos(o1.angle)
-		print "shift"
-		print shift
+
 		o1.pos[0] -= abs(shift)
-		#up = (o1.dimensions[0] - d )  * math.sin(o1.angle)
 		up = shift_d * math.sin(o1.angle)
 		
 		if up < 0.001:
-			print "change up"
-			'''
-			o2_2_ver.sort(key = lambda x: x[1])
-			o1_ver.sort(key = lambda x: x[1])
-			low = o2_2_ver[-1][1]
-			high = o1_ver[0][1]
-			up = high - low	
-			'''
+		
 			up += 0.0001
 			
-		print "up"
-		print up
-	
+        #print "up"
+
 		o1.pos[2] += abs(up)
 
 	else:
-		print "shift the right one"
-			#print shift
-		
-
-		#d_1 = o1.dimensions[0]/2.0 - (d/math.sin(o1.angle))
+        # print "shift the right one"
+	
 		shift_d = get_shift_point_dist(o1_ver, o2_2_ver)
-		#shift_d  = d_1 + (o2.dimensions[2]/2.0)*((1/math.sin(o1.angle)) + (1/math.tanh(o1.angle)))
 		shift = shift_d * math.cos(o1.angle)
-		#shift = (o2.dimensions[0] - d) * math.cos(o1.angle)
 		o2.pos[0] += abs(shift)
-			# it should, otherwise won't collide if o1 is near 0 in x axis
-			#if(shift > 0):
-		#	o2.pos[0] += shift
 		up = shift_d * math.sin(o1.angle)
-		#up = (o2.dimensions[0] - d )  * math.sin(o1.angle)
+		
 		if up < 0.001:
 			o2_2_ver.sort(key = lambda x: x[1])
 			o1_ver.sort(key = lambda x: x[1])
@@ -552,16 +490,7 @@ def fix_movables(o_list, fixed):
 			high = o1_ver[0][1]
 			up = high - low	
 		o2.pos[2] -= abs(up)
-		
-			
-
-	#o2_2_ver = makeRectangle(o2.dimensions[0], o2.dimensions[2], o2.angle, (o2.pos[0], o2.pos[2]))
-	
-	
-
-	#ver_1 = makeRectangle(o1.dimensions[0], o1.dimensions[2], o1.angle, (o1.pos[0], o1.pos[2]))
-	#ver_2 =  makeRectangle(o2.dimensions[0], o2.dimensions[2], o2.angle, (o2.pos[0], o2.pos[2]))
-	#print overlap(ver_1, ver_2)
+    
 	new.append(o1)
 	new.append(o2)
 	return new
@@ -577,29 +506,29 @@ def get_overlap_count(obst):
 	
 	movable = []
 	fixed = []
-	#print len(obst)	
+	
 	if len(obst) == 7 :
 		# one fixed obstacle
 		movable = obst[:3]
-		
-		fixed = obst[-4:]	
+		fixed = obst[-4:]
+    
 	if len(obst) == 6 :
+        
 		movable = obst[:3]
-		
 		fixed = obst[-3:]
-
-	#print movable
-  	#print fixed
-
+    
+    # two movable obstacles
+    if len(obst) == 5 :
+        
+        movable = obst[:2]
+        fixed = obst[-3:]
+    
 	# from left to right in x direction
 	movable.sort(key = lambda x: x.pos[0])
-	#fixed.sort(key = lambda x: x.pos[0])
-	#print (" do sth")
+
 	f = open('./tests/overlapcount.txt', 'a')
 
-	
-	#global draw
-	#for o1, o2 in zip(movable, movable[1:]):
+
 	for i in range(len(movable)):
 						
 		
@@ -611,8 +540,6 @@ def get_overlap_count(obst):
 		o2_ver = makeRectangle(o2.dimensions[0], o2.dimensions[2], o2.angle, (o2.pos[0], o2.pos[2]))		
 
 		o1_ver = makeRectangle(o1.dimensions[0], o1.dimensions[2], o1.angle, (o1.pos[0], o1.pos[2]))
-
-		#print ("movable %1d, "%movable.index(o1) + "movable %1d"%movable.index(o2))
 		
 		f.write("movable %1d, "%movable.index(o1) + "movable %1d"%movable.index(o2))
 		f.write('\n')
@@ -625,8 +552,6 @@ def get_overlap_count(obst):
 		
 		if(overlap(o1_ver, o2_ver)):
 		
-			#print ("hit movable %1d, "%movable.index(o1) + "movable %1d"%movable.index(o2))
-			
 			c += 1
 
 	for i in range(len(fixed)):
@@ -635,12 +560,9 @@ def get_overlap_count(obst):
 		v = makeRectangle(o.dimensions[0],o.dimensions[2], o.angle, (o.pos[0], o.pos[2]))
 		
 		for m in movable:
-			#if ( movable.index(m) == 2 and i == 0):
-				#print ("attention error ")				
-			
+		
 			ver_m =  makeRectangle(m.dimensions[0],m.dimensions[2], m.angle, (m.pos[0], m.pos[2]))	
-			#print (" movable %1d, "%movable.index(m) + "fixed %1d"%i)	
-			
+				
 			f.write(" movable %1d, "%movable.index(m) + "fixed %1d"%i)
 			f.write('\n')
 			f.write('movable  \n')	
@@ -654,8 +576,6 @@ def get_overlap_count(obst):
 			if(overlap(v, ver_m)):
 				print ("hit movable %1d"%movable.index(m) + " fixed %1d "%i)
 				c += 1
-	#f.close()
-
 	return c
 
 
@@ -702,14 +622,13 @@ def overlap(ver1, ver2):
 
 # distance to shift along first obstacle's length
 def get_shift_point_dist(ver1, ver2):
-	print ver1
-	print ver2
+    # print ver1
+    # print ver2
 	
 	ver1.sort(key = lambda x: x[1])
 	under = ver1[0]
 	
 	len_l = ver1[1]
-	
 	tmp = ver1[2]
 
 	# find the under length edge of the first obstacle
@@ -737,18 +656,19 @@ def get_shift_point_dist(ver1, ver2):
 	else:
 		left_up = can_1
 
+    '''
 	print ("under ", under )
 	print ("len_l ", len_l)
 	print ("p ", p )
 	print ("left_up ", left_up )
+    '''
 	intersect = get_intersect(under, len_l, p, left_up)
 
-	print intersect 
-
-	print ("diff 1 : ", under[0] - intersect[0])
-	print ('diff 2 : ', under[1] - intersect[1])
+    #print intersect
+    #print ("diff 1 : ", under[0] - intersect[0])
+    #print ('diff 2 : ', under[1] - intersect[1])
 	d = math.sqrt((under[0] - intersect[0])**2 + (under[1] - intersect[1])**2)
-	print ("d first calculated ", d)
+    # print ("d first calculated ", d)
 
 	left = min(p[0], left_up[0])
 	right = max(p[0], left_up[0])
@@ -756,7 +676,7 @@ def get_shift_point_dist(ver1, ver2):
 	down = min(p[1], left_up[1])
 	# if the intersect point is not on the line segment
 	if (intersect[0] < left ) or (intersect[0] > right) or (intersect[1] < down) or (intersect[1] > up):
-		print "change"
+        # print "change"
 		if p[0] < under[0]:
 		
 			d = math.sqrt((p[0] - under[0])**2 + (p[1] - under[1])**2)
@@ -764,7 +684,7 @@ def get_shift_point_dist(ver1, ver2):
 		else:
 			d = math.sqrt((left_up[0] - under[0])**2 + (left_up[1] - under[1])**2)
 
-	print ("d before return ", d)
+    #print ("d before return ", d)
 	return d
 
 # distance for movable obstacle to shift while colliding with a fixed object
@@ -788,27 +708,21 @@ def get_shift_dist(o, fix, l_fixed):
 	
 	if d2 > d1 :
 		len_l = ver[2]
-	
-	#f_ver.sort(key = lambda x: x[0])
-	f_ver.sort(key = lambda x: x[1])
-	
-	p = f_ver[-1]
 
+	f_ver.sort(key = lambda x: x[1])
+	p = f_ver[-1]
 	left_up = f_ver[-2]
 
-
-	
-	
 	intersect = get_intersect(under, len_l, p, left_up)
 	d1 = math.sqrt((under[0] - intersect[0])**2 + (under[1] - intersect[1])**2)
-	print ("d1 " , d1)
-
-	print ('intersect point : ', intersect) 
-	#if o.pos[0] < fix.pos[0]:
+    # print ("d1 " , d1)
+    # print ('intersect point : ', intersect)
+	
 	d2 = math.sqrt((len_l[0] - intersect[0])**2 + (len_l[1] - intersect[1])**2)
-	print ("d2 " , d2)
+    # print ("d2 " , d2)
+    # shift minimum distance
 	d = min(d1, d2)
-	print ("d ", d)
+    # print ("d ", d)
 	left = min(p[0], left_up[0])
 	#print ("left ", left)
 	right = max(p[0], left_up[0])
@@ -816,25 +730,8 @@ def get_shift_dist(o, fix, l_fixed):
 	up = max(p[1], left_up[1])
 	#print ("up ", up)	
 	down = min(p[1], left_up[1])
-	
-		
-		#print ('down ', down)
-		# if the intersect point is not on the line segment
-	#if (intersect[0] < left ) or (intersect[0] > right) :
-	#	print "change"
-	'''
-		if p[0] < under[0]:
-		
-			d1 = math.sqrt((p[0] - under[0])**2 + (p[1] - under[1])**2)
-			d2 = math.sqrt((p[0] - len_l[0])**2 + (p[1] - len_l[1])**2)
-			d = min(d1, d2)
 
-		else:
-			d1 = math.sqrt((left_up[0] - under[0])**2 + (left_up[1] - under[1])**2)
-			d2 = math.sqrt((left_up[0] - len_l[0])**2 + (left_up[1] - len_l[1])**2)
-			d = min(d1 , d2)
-	'''
-	print ("d before return ", d)
+    # print ("d before return ", d)
 	delta_x = d* math.cos(o.angle)
 	delta_z = d*math.sin(o.angle)
 	shifted_x = o.pos[0] + d* math.cos(o.angle)
@@ -843,13 +740,11 @@ def get_shift_dist(o, fix, l_fixed):
 	shifted = makeRectangle(o.dimensions[0], o.dimensions[2], o.angle, (shifted_x, shifted_z))
 
 	if overlap(shifted , f_ver):
-		print "not fixed yet"
+        # print "not fixed yet"
 		d = max(d1, d2)
 		delta_x = d* math.cos(o.angle)
 		delta_z = d*math.sin(o.angle)
-	#f_ver = makeRectangle(fix.dimensions[0], fix.dimensions[2], fix.angle, (fix.pos[0], fix.pos[2]))
-
-		
+	
 	return delta_x, delta_z
 	
 
@@ -886,13 +781,10 @@ def get_point_line_dist(p1, p2, angle2):
 
 	# compute point projected on the line by p2
 	denom = slope + 1/slope
-
 	numerator = p1[1] + (1/slope)*p1[0] + slope*p2[0] - p2[1]
 
 	x = numerator/denom
-
 	y = slope * x + b
-
 	d = math.sqrt((p1[0] - x)**2 + (p1[1] - y)**2)
 
 	return d
@@ -913,24 +805,4 @@ def makeRectangle(l, w, theta, (x,y)):
 	rectCoords = [(l/2.0, w/2.0), (l/2.0, -w/2.0), (-l/2.0, -w/2.0), (-l/2.0, w/2.0)]
 	
 	return [(c*x + s*y+offset[0], -s*x+c*y+offset[1]) for (x,y) in rectCoords]
-
-
-
-#print get_overlap_count(get_init_setup())
-
-
-'''
-f1 = open('./tests/checked_setup.txt', 'w')
-
-for o in obst:
-	f1.write("o ")
-	f1.write(str(o.dimensions[0]) + ' ' + str(DIMENSION_Y) + ' ' + str(o.dimensions[2]) + ' ')
-                	#print o.pos[0][0]
-	f1.write(str(float(o.pos[0])) + ' 0.0 ' + str(float(o.pos[2])) + ' ' + str(float(o.angle))+'\n' )
-
-f1.close()
-
-
-#print get_overlap_count(get_init_setup())
-'''
 

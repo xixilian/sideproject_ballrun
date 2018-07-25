@@ -194,7 +194,7 @@ class Ball_run(object):
             elif action == 5 :
                 # no smaller than -1
                 self.obstacles[0].angle = max(self.obstacles[0].angle - 0.2, -1)
-                
+
             elif action == 6 :
                 self.obstacles[1].pos[0] = min(self.obstacles[1].pos[0] + 0.05 , 0.5)
             elif action == 7 :
